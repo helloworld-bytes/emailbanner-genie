@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BannerGenie</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #6c5ce7;
+      --primary-dark: #5649c0;
+      --accent: #fd79a8;
+      --accent-dark: #e84393;
+      --dark: #1a1a2e;
+      --darker: #16213e;
+      --light: #f5f6fa;
+      --text: #e6e6e6;
+      --text-muted: #a5a5a5;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      --radius: 16px;
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: var(--font);
+      background: linear-gradient(135deg, var(--dark), var(--darker));
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
+      overflow-y: auto;
+      position: relative;
+    }
+    .email-bg {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: -1;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .email-element {
+      position: absolute;
+      opacity: 0.7;
+      animation: float linear infinite;
+    }
+    .envelope {
+      width: 25px;
+      height: 18px;
+      background: rgba(108, 92, 231, 0.15);
+      border: 1px solid rgba(108, 92, 231, 0.2);
+      border-radius: 2px;
+    }
+    .envelope::before {
+      content: '';
+      position: absolute;
+      top: -6px;
+      left: 5px;
+      width: 0;
+      height: 0;
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-bottom: 8px solid rgba(108, 92, 231, 0.2);
+    }
+    .mail-icon {
+      font-size: 20px;
+      color: rgba(108, 92, 231, 0.2);
+    }
+    .at-symbol {
+      font-size: 18px;
+      color: rgba(108, 92, 231, 0.2);
+    }
+    @keyframes float {
+      0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.7;
+      }
+      90% {
+        opacity: 0.7;
+      }
+      100% {
+        transform: translateY(-100px) rotate(10deg);
+        opacity: 0;
+      }
+    }
+    .container {
+      width: 100%;
+      max-width: 900px;
+      background: rgba(26, 26, 46, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(108, 92, 231, 0.3);
+      animation: fadeIn 0.6s ease-out;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      min-height: 80vh;
+      margin: 10px;
+      box-sizing: border-box;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .datetime {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-align: right;
+      background: rgba(26, 26, 46, 0.7);
+      padding: 5px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .logo {
+      width: 70px;
+      height: 70px;
+      margin: 0 auto 15px;
+      background: linear-gradient(45deg, var(--primary), var(--accent));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px rgba(108, 92, 231, 0.5);
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    .logo i {
+      font-size: 32px;
+      color: white;
+    }
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    h2 {
+      font-size: 1rem;
+      font-weight: 400;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+    }
+    h3 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+    .banner-info {
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      font-style: italic;
+    }
+    .drop-zone {
+      border: 3px dashed rgba(108, 92, 231, 0.5);
+      border-radius: var(--radius);
+      padding: 30px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+      background: rgba(26, 26, 46, 0.5);
+      margin-bottom: 15px;
+      position: relative;
+      overflow: hidden;
+      min-height: 180px;
+    }
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: var(--accent);
+      background: rgba(26, 26, 46, 0.7);
+      box-shadow: 0 0 20px var(--accent);
+    }
+    .drop-zone i {
+      font-size: 2.5rem;
+      color: var(--primary);
+      margin-bottom: 15px;
+    }
+    .drop-zone p {
+      font-size: 1rem;
+      color: var(--text-muted);
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--text);
+    }
+    select, button {
+      width: 100%;
+      padding: 12px 20px;
+      border-radius: var(--radius);
+      border: none;
+      font-family: var(--font);
+      font-size: 1rem;
+      font-weight: 500;
+      transition: var(--transition);
+      cursor: pointer;
+      appearance: none;
+      background: rgba(26, 26, 46, 0.7);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      min-height: 48px;
+    }
+    select:focus, button:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.3);
+    }
+    select option {
+      background: var(--darker);
+      color: var(--text);
+    }
+    button {
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      color: white;
+      margin-top: 15px;
+      box-shadow: var(--shadow);
+      border: none;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      transform: translateY(0);
+      transition: var(--transition);
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(108, 92, 231, 0.5);
+    }
+    button:active {
+      transform: translateY(0);
+    }
+    .preview-container {
+      margin: 15px 0;
+      text-align: center;
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: none;
+    }
+    .preview-container.active {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+    #emailImage {
+      max-width: 100%;
+      height: auto;
+      border-radius: var(--radius);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      border: 3px solid var(--primary);
+    }
+    .output {
+      text-align: center;
+      margin-top: 15px;
+      flex-grow: 1;
+    }
+    .success-message {
+      color: var(--accent);
+      font-weight: 600;
+      margin-top: 10px;
+      font-size: 1rem;
+    }
+    .hidden {
+      display: none;
+    }
+    .footer {
+      margin-top: auto;
+      text-align: center;
+      padding-top: 15px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 15px;
+    }
+    @media (max-width: 768px) {
+      .container {
+        padding: 15px;
+        min-height: 90vh;
+      }
+      h1 {
+        font-size: 1.8rem;
+      }
+      .logo {
+        width: 60px;
+        height: 60px;
+      }
+      .logo i {
+        font-size: 28px;
+      }
+      .drop-zone {
+        padding: 25px 15px;
+        min-height: 160px;
+      }
+      .drop-zone i {
+        font-size: 2.2rem;
+      }
+      .drop-zone p {
+        font-size: 0.9rem;
+      }
+    }
+    @media (max-width: 480px) {
+      .container {
+        padding: 10px;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+      .drop-zone {
+        padding: 20px 10px;
+        min-height: 140px;
+      }
+      .drop-zone i {
+        font-size: 2rem;
+      }
+      .drop-zone p {
+        font-size: 0.85rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="email-bg" id="emailBg"></div>
+  <div class="container">
+    <div class="datetime" id="datetime"></div>
+    <div class="header">
+      <div class="logo">
+        <i class="fas fa-envelope-open-text"></i>
+      </div>
+      <h1>BannerGenie</h1>
+      <h2>Created by Marketing Solution Center</h2>
+      <h3>Wish, Crop, Done!</h3>
+    </div>
+    <div class="drop-zone" id="emailDropZone">
+      <i class="fas fa-cloud-upload-alt"></i>
+      <p>Drag & drop your image here<br>or <span style="color: var(--accent);">click to browse</span></p>
+    </div>
+    <input type="file" id="emailImageInput" accept="image/png,image/jpeg" class="hidden">
+    <div class="form-group">
+      <label for="emailFileType">Output Format</label>
+      <select id="emailFileType">
+        <option value="image/png">PNG (Lossless)</option>
+        <option value="image/jpeg">JPEG (Smaller)</option>
+      </select>
+    </div>
+    <div class="preview-container" id="previewContainer">
+      <img id="emailImage" alt="Email banner preview">
+    </div>
+    <button id="emailDownload">
+      <i class="fas fa-crop-alt"></i> Crop & Download Banner
+    </button>
+    <div class="output" id="emailResult"></div>
+    <div class="footer">
+      ©2026 Dassault Systèmes - All rights reserved
+    </div>
+  </div>
+  <audio id="uploadSound" src="https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3" preload="auto"></audio>
+  <audio id="successSound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3" preload="auto"></audio>
+  <audio id="errorSound" src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-tone-998.mp3" preload="auto"></audio>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+  <script>
+    function createEmailBackground() {
+      const container = document.getElementById('emailBg');
+      const elementTypes = ['envelope', 'mail-icon', 'at-symbol'];
+      const count = 20;
+      for (let i = 0; i < count; i++) {
+        const element = document.createElement('div');
+        const type = elementTypes[Math.floor(Math.random() * elementTypes.length)];
+        element.classList.add('email-element', type);
+        const size = Math.random() * 20 + 15;
+        element.style.width = `${size}px`;
+        if (type !== 'at-symbol' && type !== 'mail-icon') {
+          element.style.height = `${size * 0.7}px`;
+        }
+        element.style.left = `${Math.random() * 100}%`;
+        element.style.bottom = `-50px`;
+        const duration = Math.random() * 15 + 10;
+        element.style.animationDuration = `${duration}s`;
+        const delay = Math.random() * 5;
+        element.style.animationDelay = `${delay}s`;
+        if (type === 'mail-icon') {
+          element.innerHTML = '<i class="fas fa-envelope"></i>';
+          element.style.fontSize = `${size}px`;
+        } else if (type === 'at-symbol') {
+          element.innerHTML = '<i class="fas fa-at"></i>';
+          element.style.fontSize = `${size}px`;
+        }
+        container.appendChild(element);
+      }
+    }
+    createEmailBackground();
+    function updateDateTime() {
+      const now = new Date();
+      const options = {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      };
+      const datetime = now.toLocaleDateString('en-US', options);
+      document.getElementById('datetime').textContent = datetime;
+    }
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+    function playSound(soundId) {
+      const sound = document.getElementById(soundId);
+      sound.currentTime = 0;
+      sound.play().catch(e => console.log("Sound error:", e));
+    }
+    const emailImage = document.getElementById('emailImage');
+    const emailFileType = document.getElementById('emailFileType');
+    const emailDropZone = document.getElementById('emailDropZone');
+    const emailImageInput = document.getElementById('emailImageInput');
+    const previewContainer = document.getElementById('previewContainer');
+    let emailCropper;
+    emailDropZone.addEventListener('click', () => emailImageInput.click());
+    emailDropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      emailDropZone.classList.add('dragover');
+    });
+    emailDropZone.addEventListener('dragleave', () => {
+      emailDropZone.classList.remove('dragover');
+    });
+    emailDropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      emailDropZone.classList.remove('dragover');
+      if (e.dataTransfer.files[0]) {
+        loadEmailImage(e.dataTransfer.files[0]);
+        playSound('uploadSound');
+      }
+    });
+    emailImageInput.addEventListener('change', (e) => {
+      if (e.target.files[0]) {
+        loadEmailImage(e.target.files[0]);
+        playSound('uploadSound');
+      }
+    });
+    function loadEmailImage(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        emailImage.src = reader.result;
+        previewContainer.classList.add('active');
+        if (emailCropper) emailCropper.destroy();
+        emailImage.onload = () => {
+          const w = 544;
+          const h = 214;
+          emailCropper = new Cropper(emailImage, {
+            viewMode: 1,
+            aspectRatio: w / h,
+            autoCropArea: 1,
+            background: false,
+            responsive: true,
+            touchDragZoom: true,
+            mouseWheelZoom: false,
+          });
+        };
+      };
+      reader.readAsDataURL(file);
+    }
+    document.getElementById('emailDownload').addEventListener('click', () => {
+      if (!emailCropper) {
+        playSound('errorSound');
+        return alert("Please upload an image first!");
+      }
+      const w = 544;
+      const h = 214;
+      emailCropper.getCroppedCanvas({ width: w, height: h }).toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `email-banner-${w}x${h}.${emailFileType.value.split('/')[1]}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        const result = document.getElementById('emailResult');
+        result.innerHTML = '<div class="success-message"><i class="fas fa-check-circle"></i> Banner downloaded successfully!</div>';
+        playSound('successSound');
+      }, emailFileType.value);
+    });
+  </script>
+</body>
+</html>
